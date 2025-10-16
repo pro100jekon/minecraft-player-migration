@@ -22,14 +22,14 @@ public class PlayerMigration implements ModInitializer {
 
     public static final String MOD_ID = "player-migration";
 
-    public static JsonFileRepository jsonFileRepository;
+    public static JsonFileRepository playerMigrationRepo;
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     @Override
     public void onInitialize() {
-        ServerLifecycleEvents.SERVER_STARTING.register(server -> {
-            jsonFileRepository = new JsonFileRepository(server.getPath("player-nickname-migrations/migrations.json"));
-        });
+        ServerLifecycleEvents.SERVER_STARTING.register(server ->
+                playerMigrationRepo = new JsonFileRepository(
+                        server.getPath("player-nickname-migrations/migrations.json")));
         CommandRegistrationCallback.EVENT
                 .register((dispatcher, registryAccess, environment) ->
                         dispatcher.register(createTransferPlayerCommand()));
@@ -48,7 +48,7 @@ public class PlayerMigration implements ModInitializer {
             var oldNickname = StringArgumentType.getString(ctx, "old_nickname");
             var newNickname = StringArgumentType.getString(ctx, "new_nickname");
             try {
-                jsonFileRepository.saveNewPlayerMigration(Map.entry(oldNickname, newNickname));
+                playerMigrationRepo.saveNewPlayerMigration(Map.entry(oldNickname, newNickname));
             } catch (IOException e) {
                 ctx.getSource().sendFeedback(() ->
                         Text.literal("Помилка при створенні міграції нікнейму гравця"), true);

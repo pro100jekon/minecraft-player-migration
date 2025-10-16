@@ -16,7 +16,7 @@ public class LoginHelloPacketMixin {
 
     @ModifyArg(method = "onHello", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerLoginNetworkHandler;startVerify(Lcom/mojang/authlib/GameProfile;)V"), index = 0)
     private GameProfile modifyPacket(GameProfile gameProfile) {
-        return Optional.ofNullable(PlayerMigration.jsonFileRepository)
+        return Optional.ofNullable(PlayerMigration.playerMigrationRepo)
                 .map(repo -> repo.getOriginalNickname(gameProfile.getName()))
                 .flatMap(Function.identity())
                 .map(nickname -> new GameProfile(Uuids.getOfflinePlayerUuid(nickname), gameProfile.getName()))
