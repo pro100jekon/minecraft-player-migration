@@ -3,7 +3,7 @@
   "package": "ua.kalledat.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "LoginHelloPacketMixin"
+    "ServerLoginNetworkHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

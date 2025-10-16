@@ -12,10 +12,10 @@ import java.util.Optional;
 import java.util.function.Function;
 
 @Mixin(ServerLoginNetworkHandler.class)
-public class LoginHelloPacketMixin {
+public class ServerLoginNetworkHandlerMixin {
 
     @ModifyArg(method = "onHello", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerLoginNetworkHandler;startVerify(Lcom/mojang/authlib/GameProfile;)V"), index = 0)
-    private GameProfile modifyPacket(GameProfile gameProfile) {
+    private GameProfile modifyGameProfile(GameProfile gameProfile) {
         return Optional.ofNullable(PlayerMigration.playerMigrationRepo)
                 .map(repo -> repo.getOriginalNickname(gameProfile.getName()))
                 .flatMap(Function.identity())

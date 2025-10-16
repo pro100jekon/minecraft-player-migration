@@ -37,7 +37,7 @@ public class PlayerMigration implements ModInitializer {
 
     private static LiteralArgumentBuilder<ServerCommandSource> createTransferPlayerCommand() {
         return literal("transferplayer")
-                .requires(Permissions.require("player_migration.command.transferplayer", 4))
+                .requires(Permissions.require(MOD_ID + ".command.transferplayer", 4))
                 .then(argument("old_nickname", StringArgumentType.word())
                         .then(argument("new_nickname", StringArgumentType.word())
                                 .executes(createPlayerMigration())));
@@ -51,13 +51,19 @@ public class PlayerMigration implements ModInitializer {
                 playerMigrationRepo.saveNewPlayerMigration(Map.entry(oldNickname, newNickname));
             } catch (IOException e) {
                 ctx.getSource().sendFeedback(() ->
-                        Text.literal("Помилка при створенні міграції нікнейму гравця"), true);
+                        Text.literal("Помилка при перейменуванні гравця %s".formatted(oldNickname)), true);
                 LOGGER.error("Error while saving player migration", e);
                 return -1;
             }
-            LOGGER.info("{} has been transferred to {}", oldNickname, newNickname);
+            LOGGER.info("{} has been renamed to {}", oldNickname, newNickname);
             ctx.getSource().sendFeedback(() ->
-                    Text.literal(oldNickname + " -> " + newNickname), true);
+                    Text.literal("Успішно перейменовано " + oldNickname + " -> " + newNickname), true);
+            var player = ctx.getSource().getServer().getPlayerManager().getPlayer(oldNickname);
+            if (player != null) {
+                player.sendMessage(Text.literal(
+                        "Вас було перейменовано на '%s'. Наступе підключення до сервера Борукви має відбутися під цим ніком."
+                                .formatted(newNickname)));
+            }
             return 0;
         };
     }
