@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "ua.kalledat.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "LoginHelloPacketMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}
