@@ -55,7 +55,7 @@ public class PlayerMigration implements ModInitializer {
                 LOGGER.error("Error while saving player migration", e);
                 return -1;
             }
-            LOGGER.info("{} has been renamed to {}", oldNickname, newNickname);
+            LOGGER.info("Player '{}' has been renamed to '{}'", oldNickname, newNickname);
             ctx.getSource().sendFeedback(() ->
                     Text.literal("Успішно перейменовано " + oldNickname + " -> " + newNickname), true);
             var player = ctx.getSource().getServer().getPlayerManager().getPlayer(oldNickname);
