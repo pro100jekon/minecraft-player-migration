@@ -5,8 +5,6 @@ import com.google.common.collect.HashBiMap;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,11 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import static ua.kalledat.PlayerMigration.MOD_ID;
-
 public class JsonFileRepository {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private final Path filePath;
@@ -31,7 +25,7 @@ public class JsonFileRepository {
         load();
     }
 
-    public void saveNewPlayerMigration(Map.Entry<String, String> migration) {
+    public void saveNewPlayerMigration(Map.Entry<String, String> migration) throws IOException {
         if (Objects.equals(migrations.inverse().get(migration.getKey()), migration.getValue())) {
             // Have entry nickname1 -> nickname2 and receive nickname2 -> nickname1 => remove migration
             migrations.remove(migration.getValue());
@@ -66,11 +60,7 @@ public class JsonFileRepository {
         }
     }
 
-    private void save() {
-        try {
-            Files.writeString(filePath, GSON.toJson(migrations));
-        } catch (IOException e) {
-            LOGGER.error("Failed to save JSON data at {}", filePath, e);
-        }
+    private void save() throws IOException {
+        Files.writeString(filePath, GSON.toJson(migrations));
     }
 }

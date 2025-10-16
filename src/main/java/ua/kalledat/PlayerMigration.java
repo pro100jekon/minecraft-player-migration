@@ -1,5 +1,6 @@
 package ua.kalledat;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import me.lucko.fabric.api.permissions.v0.Permissions;
@@ -11,6 +12,7 @@ import net.minecraft.text.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Map;
 
 import static net.minecraft.server.command.CommandManager.argument;
@@ -31,7 +33,6 @@ public class PlayerMigration implements ModInitializer {
         CommandRegistrationCallback.EVENT
                 .register((dispatcher, registryAccess, environment) ->
                         dispatcher.register(createTransferPlayerCommand()));
-        LOGGER.info("Hello Fabric world!");
     }
 
     private static LiteralArgumentBuilder<ServerCommandSource> createTransferPlayerCommand() {
@@ -39,13 +40,25 @@ public class PlayerMigration implements ModInitializer {
                 .requires(Permissions.require("player_migration.command.transferplayer", 4))
                 .then(argument("old_nickname", StringArgumentType.word())
                         .then(argument("new_nickname", StringArgumentType.word())
-                                .executes(ctx -> {
-                                    var oldNickname = StringArgumentType.getString(ctx, "old_nickname");
-                                    var newNickname = StringArgumentType.getString(ctx, "new_nickname");
-                                    jsonFileRepository.saveNewPlayerMigration(Map.entry(oldNickname, newNickname));
-                                    ctx.getSource().sendFeedback(() ->
-                                            Text.literal(oldNickname + " -> " + newNickname), true);
-                                    return 0;
-                                })));
+                                .executes(createPlayerMigration())));
+    }
+
+    private static Command<ServerCommandSource> createPlayerMigration() {
+        return ctx -> {
+            var oldNickname = StringArgumentType.getString(ctx, "old_nickname");
+            var newNickname = StringArgumentType.getString(ctx, "new_nickname");
+            try {
+                jsonFileRepository.saveNewPlayerMigration(Map.entry(oldNickname, newNickname));
+            } catch (IOException e) {
+                ctx.getSource().sendFeedback(() ->
+                        Text.literal("Помилка при створенні міграції нікнейму гравця"), true);
+                LOGGER.error("Error while saving player migration", e);
+                return -1;
+            }
+            LOGGER.info("{} has been transferred to {}", oldNickname, newNickname);
+            ctx.getSource().sendFeedback(() ->
+                    Text.literal(oldNickname + " -> " + newNickname), true);
+            return 0;
+        };
     }
 }
