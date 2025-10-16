@@ -7,6 +7,7 @@ import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import org.slf4j.Logger;
@@ -25,11 +26,28 @@ public class PlayerMigration implements ModInitializer {
     public static JsonFileRepository playerMigrationRepo;
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
+    private static MinecraftServer minecraftServer;
+
     @Override
     public void onInitialize() {
-        ServerLifecycleEvents.SERVER_STARTING.register(server ->
+        ServerLifecycleEvents.SERVER_STARTING.register(server -> {
+            minecraftServer = server;
+            if (!server.isOnlineMode()) {
                 playerMigrationRepo = new JsonFileRepository(
-                        server.getPath("player-nickname-migrations/migrations.json")));
+                        server.getPath("player-nickname-migrations/migrations.json"));
+            }
+        });
+        if (minecraftServer != null && minecraftServer.isOnlineMode()) {
+            LOGGER.info("Player migration feature is turned off, since the server is started in online mode!");
+            return;
+        }
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+            try {
+                playerMigrationRepo.save();
+            } catch (IOException ignored) {
+
+            }
+        });
         CommandRegistrationCallback.EVENT
                 .register((dispatcher, registryAccess, environment) ->
                         dispatcher.register(createTransferPlayerCommand()));

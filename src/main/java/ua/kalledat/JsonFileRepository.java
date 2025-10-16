@@ -60,7 +60,7 @@ public class JsonFileRepository {
         }
     }
 
-    private void save() throws IOException {
+    public void save() throws IOException {
         Files.writeString(filePath, GSON.toJson(migrations));
     }
 }
