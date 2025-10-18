@@ -18,10 +18,9 @@ public class VelocityLoginMixin {
                 .setIndex(buf.readerIndex(), buf.writerIndex());
         // shifting index to read nickname
         newPacket.readUuid();
-        var uuid = Uuids.getOfflinePlayerUuid(buf.readString(16));
         newPacket
                 .setIndex(buf.readerIndex(), buf.writerIndex())
-                .writeUuid(uuid)
+                .writeUuid(Uuids.getOfflinePlayerUuid(newPacket.readString(16)))
                 .setIndex(buf.readerIndex(), buf.writerIndex());
         return newPacket;
     }
