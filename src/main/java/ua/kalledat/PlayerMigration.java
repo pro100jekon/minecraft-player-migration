@@ -79,7 +79,7 @@ public class PlayerMigration implements ModInitializer {
             var player = ctx.getSource().getServer().getPlayerManager().getPlayer(oldNickname);
             if (player != null) {
                 player.sendMessage(Text.literal(
-                        "Вас було перейменовано на '%s'. Наступе підключення до сервера Борукви має відбутися під цим ніком."
+                        "Вас було перейменовано на '%s'. Наступне підключення до сервера Борукви має відбутися під цим ніком."
                                 .formatted(newNickname)));
             }
             return 0;
