@@ -16,13 +16,12 @@ public class VelocityLoginMixin {
     private static PacketByteBuf changeUuid(PacketByteBuf buf) {
         var readerIndex = buf.readerIndex();
         var writerIndex = buf.writerIndex();
-        var newPacket = new PacketByteBuf(buf.copy())
-                .setIndex(readerIndex, writerIndex);
         // shifting index to read nickname
         buf.readUuid();
-        newPacket
-                .writeUuid(Uuids.getOfflinePlayerUuid(buf.readString(16)))
+        var uuid = Uuids.getOfflinePlayerUuid(buf.readString(16));
+        return buf
+                .setLong(readerIndex, uuid.getMostSignificantBits())
+                .setLong(readerIndex + 8, uuid.getLeastSignificantBits())
                 .setIndex(readerIndex, writerIndex);
-        return newPacket;
     }
 }
