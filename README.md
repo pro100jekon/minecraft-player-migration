@@ -1,4 +1,4 @@
-# Minecraft Player Renaming plugin 0.1.1+1.21.8
+# Minecraft Player Renaming plugin 0.1.2+1.21.8
 Simple Fabric-based mod that adds a command for server operators to handle player renaming with saving all player's progress on a new nickname.
 
 ### NOTE. This works only for Minecraft Server that is launched in offline mode!
