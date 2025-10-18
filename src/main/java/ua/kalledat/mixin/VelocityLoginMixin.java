@@ -14,14 +14,16 @@ public class VelocityLoginMixin {
 
     @ModifyVariable(method = "createProfile", at = @At(value = "HEAD"), argsOnly = true)
     private static PacketByteBuf changeUuid(PacketByteBuf buf) {
+        var readerIndex = buf.readerIndex();
+        var writerIndex = buf.writerIndex();
         var newPacket = new PacketByteBuf(buf.copy())
-                .setIndex(buf.readerIndex(), buf.writerIndex());
+                .setIndex(readerIndex, writerIndex);
         // shifting index to read nickname
-        newPacket.readUuid();
+        buf.readUuid();
         newPacket
-                .setIndex(buf.readerIndex(), buf.writerIndex())
-                .writeUuid(Uuids.getOfflinePlayerUuid(newPacket.readString(16)))
-                .setIndex(buf.readerIndex(), buf.writerIndex());
+                .setIndex(readerIndex, writerIndex)
+                .writeUuid(Uuids.getOfflinePlayerUuid(buf.readString(16)))
+                .setIndex(readerIndex, writerIndex);
         return newPacket;
     }
 }
