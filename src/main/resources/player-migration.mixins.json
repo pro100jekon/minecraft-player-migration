@@ -3,7 +3,8 @@
   "package": "ua.kalledat.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "UuidsMixin"
+    "UuidsMixin",
+    "VelocityLoginMixin"
   ],
   "injectors": {
     "defaultRequire": 1
