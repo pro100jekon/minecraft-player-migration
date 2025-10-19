@@ -39,7 +39,7 @@ dependencies {
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     modImplementation "me.lucko:fabric-permissions-api:${project.permissions_api_version}"
-    modImplementation "maven.modrinth:fabricproxy-lite:v2.10.0"
+    modImplementation "maven.modrinth:fabricproxy-lite:${project.fabric_proxy_lite_version}"
 }
 
 processResources {
