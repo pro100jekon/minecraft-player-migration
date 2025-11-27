@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 @Pseudo
 public class VelocityLoginMixin {
 
-    @ModifyVariable(method = "createProfile", at = @At(value = "HEAD"), argsOnly = true)
+    @ModifyVariable(method = "createProfile", at = @At(value = "HEAD"), argsOnly = true, name = "arg0")
     private static PacketByteBuf changeUuid(PacketByteBuf buf) {
         var readerIndex = buf.readerIndex();
         var writerIndex = buf.writerIndex();

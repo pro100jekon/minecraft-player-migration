@@ -1,23 +1,14 @@
 package ua.kalledat;
 
-import com.mojang.brigadier.Command;
-import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import me.lucko.fabric.api.permissions.v0.Permissions;
+import eu.pb4.polymer.resourcepack.api.PolymerResourcePackUtils;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ua.kalledat.command.TransferPlayerCommand;
 
 import java.io.IOException;
-import java.util.Map;
-
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
 
 public class PlayerMigration implements ModInitializer {
 
@@ -48,41 +39,8 @@ public class PlayerMigration implements ModInitializer {
 
             }
         });
-        CommandRegistrationCallback.EVENT
-                .register((dispatcher, registryAccess, environment) ->
-                        dispatcher.register(createTransferPlayerCommand()));
-    }
-
-    private static LiteralArgumentBuilder<ServerCommandSource> createTransferPlayerCommand() {
-        return literal("transferplayer")
-                .requires(Permissions.require(MOD_ID + ".command.transferplayer", 4))
-                .then(argument("old_nickname", StringArgumentType.word())
-                        .then(argument("new_nickname", StringArgumentType.word())
-                                .executes(createPlayerMigration())));
-    }
-
-    private static Command<ServerCommandSource> createPlayerMigration() {
-        return ctx -> {
-            var oldNickname = StringArgumentType.getString(ctx, "old_nickname");
-            var newNickname = StringArgumentType.getString(ctx, "new_nickname");
-            try {
-                playerMigrationRepo.saveNewPlayerMigration(Map.entry(oldNickname, newNickname));
-            } catch (IOException e) {
-                ctx.getSource().sendFeedback(() ->
-                        Text.literal("Помилка при перейменуванні гравця %s".formatted(oldNickname)), true);
-                LOGGER.error("Error while saving player migration", e);
-                return -1;
-            }
-            LOGGER.info("Player '{}' has been renamed to '{}'", oldNickname, newNickname);
-            ctx.getSource().sendFeedback(() ->
-                    Text.literal("Успішно перейменовано " + oldNickname + " -> " + newNickname), true);
-            var player = ctx.getSource().getServer().getPlayerManager().getPlayer(oldNickname);
-            if (player != null) {
-                player.sendMessage(Text.literal(
-                        "Вас було перейменовано на '%s'. Наступне підключення до сервера Борукви має відбутися під цим ніком."
-                                .formatted(newNickname)));
-            }
-            return 0;
-        };
+        TransferPlayerCommand.registerCommand();
+        PolymerResourcePackUtils.addModAssets(MOD_ID);
+        PolymerResourcePackUtils.markAsRequired();
     }
 }

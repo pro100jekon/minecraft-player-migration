@@ -1,0 +1,5 @@
+{
+  "player-migration.rename-error": "Помилка при перейменуванні гравця '%s'",
+  "player-migration.rename-success": "Успішно перейменовано '%s' на '%s'",
+  "player-migration.renamed-player-notification": "Вас було перейменовано на '%s'. Наступного разу підключіться за цим нікнеймом"
+}
