@@ -1,6 +1,5 @@
 package ua.kalledat.mixin;
 
-import net.minecraft.util.Uuids;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -8,11 +7,12 @@ import ua.kalledat.PlayerMigration;
 
 import java.util.Optional;
 import java.util.function.Function;
+import net.minecraft.core.UUIDUtil;
 
-@Mixin(Uuids.class)
+@Mixin(UUIDUtil.class)
 public class UuidsMixin {
 
-    @ModifyVariable(method = "getOfflinePlayerUuid", at = @At(value = "HEAD"), argsOnly = true)
+    @ModifyVariable(method = "createOfflinePlayerUUID", at = @At(value = "HEAD"), argsOnly = true)
     private static String modifyNickname(String nickname) {
         return Optional.ofNullable(PlayerMigration.playerMigrationRepo)
                 .map(repo -> repo.getOriginalNickname(nickname))

@@ -23,12 +23,12 @@ public class PlayerMigration implements ModInitializer {
     public void onInitialize() {
         ServerLifecycleEvents.SERVER_STARTING.register(server -> {
             minecraftServer = server;
-            if (!server.isOnlineMode()) {
+            if (!server.usesAuthentication()) {
                 playerMigrationRepo = new JsonFileRepository(
-                        server.getPath("player-nickname-migrations/migrations.json"));
+                        server.getFile("player-nickname-migrations/migrations.json"));
             }
         });
-        if (minecraftServer != null && minecraftServer.isOnlineMode()) {
+        if (minecraftServer != null && minecraftServer.usesAuthentication()) {
             LOGGER.info("Player migration feature is turned off, since the server is started in online mode!");
             return;
         }
