@@ -5,17 +5,16 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.scoreboard.ScoreHolder;
-import net.minecraft.scoreboard.ServerScoreboard;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
-
+import net.minecraft.server.ServerScoreboard;
+import net.minecraft.world.scores.ScoreHolder;
 import java.io.IOException;
 import java.util.Map;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 import static ua.kalledat.PlayerMigration.*;
 
 public class TransferPlayerCommand {
@@ -26,7 +25,7 @@ public class TransferPlayerCommand {
                         dispatcher.register(createTransferPlayerCommand()));
     }
 
-    private static LiteralArgumentBuilder<ServerCommandSource> createTransferPlayerCommand() {
+    private static LiteralArgumentBuilder<CommandSourceStack> createTransferPlayerCommand() {
         return literal("transferplayer")
                 .requires(Permissions.require(MOD_ID + ".command.transferplayer", 4))
                 .then(argument("old_nickname", StringArgumentType.word())
@@ -34,25 +33,25 @@ public class TransferPlayerCommand {
                                 .executes(createPlayerMigration())));
     }
 
-    private static Command<ServerCommandSource> createPlayerMigration() {
+    private static Command<CommandSourceStack> createPlayerMigration() {
         return ctx -> {
             var oldNickname = StringArgumentType.getString(ctx, "old_nickname");
             var newNickname = StringArgumentType.getString(ctx, "new_nickname");
             try {
                 playerMigrationRepo.saveNewPlayerMigration(Map.entry(oldNickname, newNickname));
             } catch (IOException e) {
-                ctx.getSource().sendFeedback(() ->
-                        Text.translatable("player-migration.rename-error", oldNickname), true);
+                ctx.getSource().sendSuccess(() ->
+                        Component.translatable("player-migration.rename-error", oldNickname), true);
                 LOGGER.error("Error while saving player migration", e);
                 return -1;
             }
             transferScoreboardScores(ctx.getSource().getServer(), oldNickname, newNickname);
             LOGGER.info("Player '{}' has been renamed to '{}'", oldNickname, newNickname);
-            ctx.getSource().sendFeedback(() ->
-                    Text.translatable("player-migration.rename-success",oldNickname, newNickname), true);
-            var player = ctx.getSource().getServer().getPlayerManager().getPlayer(oldNickname);
+            ctx.getSource().sendSuccess(() ->
+                    Component.translatable("player-migration.rename-success",oldNickname, newNickname), true);
+            var player = ctx.getSource().getServer().getPlayerList().getPlayerByName(oldNickname);
             if (player != null) {
-                player.sendMessage(Text.translatable("player-migration.renamed-player-notification", newNickname));
+                player.sendSystemMessage(Component.translatable("player-migration.renamed-player-notification", newNickname));
             }
             return 0;
         };
@@ -60,10 +59,10 @@ public class TransferPlayerCommand {
 
     private static void transferScoreboardScores(MinecraftServer server, String oldName, String newName) {
         ServerScoreboard scoreboard = server.getScoreboard();
-        ScoreHolder oldHolder = ScoreHolder.fromName(oldName);
-        ScoreHolder newHolder = ScoreHolder.fromName(newName);
+        ScoreHolder oldHolder = ScoreHolder.forNameOnly(oldName);
+        ScoreHolder newHolder = ScoreHolder.forNameOnly(newName);
 
-        var oldScores = scoreboard.getScoreHolderObjectives(oldHolder);
+        var oldScores = scoreboard.listPlayerScores(oldHolder);
         if (oldScores.isEmpty()) {
             LOGGER.info("No scoreboard scores found for '{}'", oldName);
             return;
@@ -73,7 +72,7 @@ public class TransferPlayerCommand {
         for (var entry : oldScores.object2IntEntrySet()) {
             var objective = entry.getKey();
             int score = entry.getIntValue();
-            scoreboard.getOrCreateScore(newHolder, objective, true).setScore(score);
+            scoreboard.getOrCreatePlayerScore(newHolder, objective, true).set(score);
             transferred++;
         }
         LOGGER.info("Transferred {} scoreboard scores from '{}' to '{}'", transferred, oldName, newName);
