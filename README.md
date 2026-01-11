@@ -1,3 +1,6 @@
+# ToDo list
+- message for connected players using old nicknames 
+
 # Minecraft Player Renaming plugin v0.1.3+1.21.10
 Simple Fabric+Polymer-based mod that adds a command for server operators to handle player renaming with saving all player's progress on a new nickname.
 
@@ -24,4 +27,4 @@ And start the server. Once it has started, the data is parsed once, and then is 
 After every successful command execution (and server shutdown), `player-nickname-migrations/migrations.json` will be updated.
 
 ## Permissions
-By default, level 4 operator is required, but due to [Fabric Permissions API](https://github.com/lucko/fabric-permissions-api) you can set `player-migration.command.transferplayer` permission.
+By default, level 4 operator is required, but thanks to [Fabric Permissions API](https://github.com/lucko/fabric-permissions-api) you can set `player-migration.command.transferplayer` permission.

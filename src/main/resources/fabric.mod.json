@@ -22,6 +22,7 @@
   "mixins": [
     "player-migration.mixins.json"
   ],
+  "accessWidener": "player-migration.classtweaker",
   "depends": {
     "fabricloader": ">=0.17.2",
     "minecraft": ">=1.21.9",
