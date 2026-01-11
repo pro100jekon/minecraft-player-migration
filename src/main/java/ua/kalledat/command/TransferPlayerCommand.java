@@ -12,8 +12,10 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import java.io.IOException;
 import java.util.Map;
+import java.util.UUID;
 import me.lucko.fabric.api.permissions.v0.Permissions;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.chat.Component;
@@ -53,37 +55,42 @@ public class TransferPlayerCommand {
       return -1;
     }
     var uuid = UUIDUtil.createOfflinePlayerUUID(newNickname);
-    transferScoreboardScores(ctx.getSource().getServer(),
+    var server = ctx.getSource().getServer();
+    transferScoreboardScores(server,
         new GameProfile(uuid, oldNickname), new GameProfile(uuid, newNickname));
     if (successful) {
       LOGGER.info("Player '{}' has been renamed to '{}'", oldNickname, newNickname);
       ctx.getSource().sendSuccess(() ->
               Component.translatable("player-migration.rename-success", oldNickname, newNickname),
           true);
+      updateWhitelist(server, uuid, currentNickname, newNickname);
     } else {
       ctx.getSource().sendSuccess(
           () -> Component.translatable("player-migration.rename-exists"), false);
     }
-    var player = ctx.getSource().getServer().getPlayerList().getPlayerByName(oldNickname);
+    var player = server.getPlayerList().getPlayerByName(oldNickname);
     if (player != null) {
       player.connection.disconnect(
-          Component.literal("You were renamed to '%s'. Please login with this nickname"
-              .formatted(newNickname)));
+          Component.literal("You were renamed to '")
+              .append(Component.literal(newNickname).withStyle(ChatFormatting.GREEN))
+              .append(Component.literal("'. Please login with this nickname")));
     }
-    var wl = player.level().getServer().getPlayerList().getWhiteList();
-    wl.remove(new NameAndId(uuid, currentNickname));
-    wl.add(new UserWhiteListEntry(
-        new NameAndId(uuid, newNickname)));
     return 0;
+  }
+
+  private static void updateWhitelist(
+      MinecraftServer server, UUID uuid, String currentNickname, String newNickname) {
+    var wl = server.getPlayerList().getWhiteList();
+    wl.remove(new NameAndId(uuid, currentNickname));
+    wl.add(new UserWhiteListEntry(new NameAndId(uuid, newNickname)));
   }
 
   private static void transferScoreboardScores(
       MinecraftServer server, GameProfile oldName, GameProfile newName) {
     var scoreboard = (Scoreboard) server.getScoreboard();
     var removed = scoreboard.playerScores.remove(oldName.name());
-    var oldHolder = ScoreHolder.fromGameProfile(oldName);
     if (removed != null) {
-      scoreboard.onPlayerRemoved(oldHolder);
+      scoreboard.onPlayerRemoved(ScoreHolder.fromGameProfile(oldName));
       scoreboard.playerScores.put(newName.name(), removed);
     }
   }
