@@ -12,16 +12,16 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 @Pseudo
 public class VelocityLoginMixin {
 
-    @ModifyVariable(method = "createProfile", at = @At(value = "HEAD"), argsOnly = true, name = "arg0")
-    private static FriendlyByteBuf changeUuid(FriendlyByteBuf buf) {
-        var readerIndex = buf.readerIndex();
-        var writerIndex = buf.writerIndex();
-        // shifting index to read nickname
-        buf.readUUID();
-        var uuid = UUIDUtil.createOfflinePlayerUUID(buf.readUtf(16));
-        return buf
-                .setLong(readerIndex, uuid.getMostSignificantBits())
-                .setLong(readerIndex + 8, uuid.getLeastSignificantBits())
-                .setIndex(readerIndex, writerIndex);
-    }
+  @ModifyVariable(method = "createProfile", at = @At(value = "HEAD"), argsOnly = true, name = "arg0")
+  private static FriendlyByteBuf changeUuid(FriendlyByteBuf buf) {
+    var readerIndex = buf.readerIndex();
+    var writerIndex = buf.writerIndex();
+    // shifting index to read nickname
+    buf.readUUID();
+    var uuid = UUIDUtil.createOfflinePlayerUUID(buf.readUtf(16));
+    return buf
+        .setLong(readerIndex, uuid.getMostSignificantBits())
+        .setLong(readerIndex + 8, uuid.getLeastSignificantBits())
+        .setIndex(readerIndex, writerIndex);
+  }
 }
