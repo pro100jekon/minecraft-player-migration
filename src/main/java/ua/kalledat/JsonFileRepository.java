@@ -47,6 +47,10 @@ public class JsonFileRepository {
     return Optional.ofNullable(migrations.inverse().get(nickname));
   }
 
+  public Optional<String> getCurrentNickname(String nickname) {
+    return Optional.ofNullable(migrations.get(nickname));
+  }
+
   private void load() {
     try {
       if (Files.exists(filePath)) {

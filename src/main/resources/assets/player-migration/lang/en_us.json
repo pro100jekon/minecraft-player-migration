@@ -1,6 +1,5 @@
 {
   "player-migration.rename-error": "There was an error while renaming player '%s'",
   "player-migration.rename-success": "Successfully renamed '%s' to '%s'",
-  "player-migration.rename-exists": "This migration already exists, only scoreboards were affected",
-  "player-migration.renamed-player-notification": "You were renamed to '%s'. Please login with this nickname next time"
+  "player-migration.rename-exists": "This migration already exists, only scoreboards were affected"
 }
