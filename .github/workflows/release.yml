@@ -3,7 +3,7 @@ name: Release Mod
 on:
   push:
     tags:
-      - "v*" # Triggers when you push a tag starting with v (e.g. v1.0.2)
+      - "*" # Triggers when you push a tag starting with v (e.g. v1.0.2)
 
 jobs:
   build-and-release:
